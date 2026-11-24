@@ -1,0 +1,1349 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Correios — Redesign Entrega & Rastreamento (Protótipo V2)</title>
+  <style>
+    :root {
+      --correios-yellow: #FFD400;
+      --correios-blue: #00416B;
+      --correios-blue-dark: #002D4B;
+      --bg-page: #E9EEF4;
+      --bg-app: #F6F8FA;
+      --surface: #FFFFFF;
+      --text-main: #1A2433;
+      --text-muted: #5A6778;
+      --border: #DCE3EC;
+      --warning-bg: #FFF8E1;
+      --warning-border: #F59E0B;
+      --warning-text: #92400E;
+      --success-bg: #ECFDF5;
+      --success-border: #10B981;
+      --success-text: #065F46;
+      --danger-bg: #FEF2F2;
+      --danger-text: #991B1B;
+      --radius: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background: var(--bg-page);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 16px 0;
+    }
+
+    /* Moldura Mobile-First */
+    .phone-frame {
+      width: 100%;
+      max-width: 410px;
+      min-height: 760px;
+      background: var(--bg-app);
+      border-radius: 28px;
+      box-shadow: 0 20px 50px rgba(0, 35, 65, 0.16);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      border: 6px solid #1E293B;
+      position: relative;
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 0;
+        background: var(--bg-app);
+      }
+      .phone-frame {
+        max-width: 100%;
+        min-height: 100vh;
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+      }
+    }
+
+    /* Cabeçalho */
+    .app-header {
+      background: var(--correios-yellow);
+      color: var(--correios-blue);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      border-bottom: 3px solid var(--correios-blue);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font-weight: 800;
+      font-size: 1rem;
+      letter-spacing: -0.3px;
+    }
+
+    .brand-icon {
+      width: 28px;
+      height: 28px;
+      background: var(--correios-blue);
+      color: var(--correios-yellow);
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+
+    /* MELHORIA V2: Botão de alto contraste com ícone e rótulo acionável */
+    .header-action {
+      background: var(--correios-blue);
+      color: #FFFFFF;
+      border: 2px solid var(--correios-blue-dark);
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 2px 6px rgba(0, 45, 75, 0.22);
+      transition: background 0.15s ease, transform 0.1s ease;
+      white-space: nowrap;
+      min-height: 38px;
+    }
+
+    .header-action:hover {
+      background: var(--correios-blue-dark);
+    }
+
+    .header-action:active {
+      transform: scale(0.97);
+    }
+
+    /* Barra de navegação interna */
+    .nav-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 18px 4px;
+    }
+
+    .btn-back {
+      background: none;
+      border: none;
+      color: var(--correios-blue);
+      font-weight: 700;
+      font-size: 0.92rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 4px;
+      min-height: 40px;
+    }
+
+    .step-indicator {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      background: #E2E8F0;
+      padding: 4px 10px;
+      border-radius: 999px;
+    }
+
+    /* Telas */
+    .screen {
+      display: none;
+      padding: 16px 18px 24px;
+      flex: 1;
+      flex-direction: column;
+      gap: 15px;
+      animation: fadeIn 0.22s ease;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Cards & Tipografia */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+    }
+
+    h1 {
+      font-size: 1.25rem;
+      color: var(--correios-blue-dark);
+      line-height: 1.25;
+    }
+
+    h2 {
+      font-size: 1.05rem;
+      color: var(--correios-blue-dark);
+      margin-bottom: 6px;
+    }
+
+    p {
+      font-size: 0.93rem;
+      line-height: 1.45;
+      color: var(--text-muted);
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 5px 10px;
+      border-radius: 999px;
+      width: fit-content;
+    }
+
+    .badge-warning {
+      background: var(--warning-bg);
+      color: var(--warning-text);
+      border: 1px solid #FCD34D;
+    }
+
+    .badge-success {
+      background: var(--success-bg);
+      color: var(--success-text);
+      border: 1px solid #6EE7B7;
+    }
+
+    .badge-info {
+      background: #EFF6FF;
+      color: var(--correios-blue);
+      border: 1px solid #BFDBFE;
+    }
+
+    /* Botões */
+    .btn {
+      width: 100%;
+      min-height: 48px;
+      border-radius: 12px;
+      border: none;
+      font-size: 0.96rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 16px;
+      transition: transform 0.1s ease, background 0.15s ease;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn-primary {
+      background: var(--correios-blue);
+      color: #FFFFFF;
+    }
+
+    .btn-primary:hover {
+      background: var(--correios-blue-dark);
+    }
+
+    .btn-secondary {
+      background: #FFFFFF;
+      color: var(--correios-blue);
+      border: 2px solid var(--correios-blue);
+    }
+
+    .btn-secondary:hover {
+      background: #EFF6FF;
+    }
+
+    .btn-yellow {
+      background: var(--correios-yellow);
+      color: var(--correios-blue-dark);
+    }
+
+    /* MELHORIA V2: Atalho contextual do Aviso Físico dentro do card de status */
+    .btn-notice-inline {
+      margin-top: 6px;
+      width: 100%;
+      min-height: 42px;
+      background: #FFFFFF;
+      color: var(--correios-blue);
+      border: 1.5px solid var(--correios-blue);
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 0.86rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      transition: background 0.15s ease;
+    }
+
+    .btn-notice-inline:hover {
+      background: #EFF6FF;
+    }
+
+    .btn-notice-inline-left {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .inline-link-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 6px;
+      background: #EFF6FF;
+      color: var(--correios-blue);
+      border: 1px solid #BFDBFE;
+      border-radius: 8px;
+      padding: 5px 10px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .inline-link-chip:hover {
+      background: #DBEAFE;
+    }
+
+    /* Simulador de Leitura QR (Tela 1) */
+    .scan-box {
+      background: #0F172A;
+      color: #FFFFFF;
+      border-radius: var(--radius);
+      padding: 20px 16px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .scan-frame {
+      width: 126px;
+      height: 126px;
+      margin: 10px auto 14px;
+      border: 3px solid var(--correios-yellow);
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: rgba(255, 255, 255, 0.06);
+      position: relative;
+    }
+
+    .scan-line {
+      position: absolute;
+      width: 90%;
+      height: 3px;
+      background: var(--correios-yellow);
+      box-shadow: 0 0 10px var(--correios-yellow);
+      animation: scanMove 1.8s infinite ease-in-out;
+    }
+
+    @keyframes scanMove {
+      0%, 100% { top: 14px; }
+      50% { top: 106px; }
+    }
+
+    .package-summary {
+      border-left: 4px solid var(--correios-blue);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .code-pill {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.85rem;
+      background: #F1F5F9;
+      color: var(--text-main);
+      padding: 4px 8px;
+      border-radius: 6px;
+      width: fit-content;
+      font-weight: 700;
+    }
+
+    /* Alerta de Tentativa (Tela 2) */
+    .alert-box {
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      border: 1px solid var(--warning-border);
+      background: var(--warning-bg);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .alert-box.confirmed {
+      border-color: var(--success-border);
+      background: var(--success-bg);
+    }
+
+    .attempts-dots {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 2px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--warning-text);
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 2px solid var(--warning-border);
+      background: transparent;
+    }
+
+    .dot.filled {
+      background: var(--warning-border);
+    }
+
+    /* Linha do Tempo Limpa */
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin-top: 6px;
+    }
+
+    .tl-item {
+      display: flex;
+      gap: 12px;
+      position: relative;
+      padding-bottom: 18px;
+    }
+
+    .tl-item:last-child {
+      padding-bottom: 0;
+    }
+
+    .tl-marker-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 20px;
+      flex-shrink: 0;
+    }
+
+    .tl-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #CBD5E1;
+      border: 3px solid #FFFFFF;
+      box-shadow: 0 0 0 2px #CBD5E1;
+      z-index: 1;
+      margin-top: 3px;
+    }
+
+    .tl-item.done .tl-dot {
+      background: #10B981;
+      box-shadow: 0 0 0 2px #10B981;
+    }
+
+    .tl-item.current .tl-dot {
+      background: #F59E0B;
+      box-shadow: 0 0 0 3px #FDE68A;
+    }
+
+    .tl-line {
+      width: 2px;
+      flex: 1;
+      background: #CBD5E1;
+      margin-top: 4px;
+    }
+
+    .tl-item.done .tl-line {
+      background: #10B981;
+    }
+
+    .tl-item:last-child .tl-line {
+      display: none;
+    }
+
+    .tl-title {
+      font-weight: 700;
+      font-size: 0.92rem;
+      color: var(--text-main);
+    }
+
+    .tl-meta {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Cards de Decisão (Tela 3) */
+    .choice-card {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      cursor: pointer;
+      transition: border-color 0.15s ease, background 0.15s ease;
+    }
+
+    .choice-card.selected {
+      border-color: var(--correios-blue);
+      background: #F0F7FF;
+    }
+
+    .choice-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .choice-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: #EFF6FF;
+      color: var(--correios-blue);
+      display: grid;
+      place-items: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .choice-body {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .choice-card.selected .choice-body {
+      display: flex;
+    }
+
+    .pill-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .pill-btn {
+      min-height: 44px;
+      border: 1.5px solid var(--border);
+      background: #FFFFFF;
+      border-radius: 10px;
+      padding: 8px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: var(--text-main);
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .pill-btn.active {
+      border-color: var(--correios-blue);
+      background: var(--correios-blue);
+      color: #FFFFFF;
+    }
+
+    .input-field {
+      width: 100%;
+      min-height: 44px;
+      border: 1.5px solid #CBD5E1;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 0.94rem;
+      outline: none;
+    }
+
+    .input-field:focus {
+      border-color: var(--correios-blue);
+    }
+
+    .error-msg {
+      font-size: 0.82rem;
+      color: var(--danger-text);
+      display: none;
+    }
+
+    /* PIN Box */
+    .pin-display {
+      background: var(--correios-blue-dark);
+      color: var(--correios-yellow);
+      border-radius: 12px;
+      padding: 14px;
+      text-align: center;
+    }
+
+    .pin-code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 2rem;
+      font-weight: 900;
+      letter-spacing: 8px;
+      margin: 4px 0;
+    }
+
+    /* Passe de Retirada (Tela 4) */
+    .deadline-banner {
+      background: var(--danger-bg);
+      color: var(--danger-text);
+      border: 1px solid #FECACA;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+
+    .checklist-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid #F1F5F9;
+      cursor: pointer;
+      font-size: 0.92rem;
+    }
+
+    .checklist-item:last-child {
+      border-bottom: none;
+    }
+
+    .checklist-item input {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--correios-blue);
+    }
+
+    .qr-pass-card {
+      text-align: center;
+      border: 2px dashed var(--correios-blue);
+      background: #FFFFFF;
+    }
+
+    .qr-svg-wrap {
+      display: inline-block;
+      padding: 12px;
+      background: #FFFFFF;
+      border-radius: 12px;
+      margin: 8px 0;
+    }
+
+    /* Rodapé do Protótipo */
+    .proto-footer {
+      padding: 12px 18px;
+      border-top: 1px solid var(--border);
+      background: #F1F5F9;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .version-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 700;
+      color: var(--correios-blue);
+    }
+
+    .link-btn {
+      background: none;
+      border: none;
+      color: var(--correios-blue);
+      font-weight: 700;
+      font-size: 0.78rem;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    /* Toast de feedback */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #0F172A;
+      color: #FFFFFF;
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s ease;
+      z-index: 100;
+      max-width: 90%;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Modal do Cartão Físico Imprimível */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 50;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .physical-card {
+      background: #FFFFFF;
+      width: 100%;
+      max-width: 390px;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 3px solid var(--correios-blue);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+    }
+
+    .physical-card-top {
+      background: var(--correios-yellow);
+      color: var(--correios-blue-dark);
+      padding: 14px 16px;
+      border-bottom: 3px solid var(--correios-blue);
+    }
+
+    .physical-card-body {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .physical-qr-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: #F8FAFC;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    @media print {
+      body * { visibility: hidden; }
+      .physical-card, .physical-card * { visibility: visible; }
+      .physical-card {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        box-shadow: none;
+      }
+      .no-print { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <main class="phone-frame" aria-label="Protótipo de Redesign Correios V2">
+    <!-- Cabeçalho fixo com botão Ver Aviso Físico em alto contraste (Melhoria pós-teste V2) -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-icon">C</div>
+        <span>Correios • Entrega Fácil</span>
+      </div>
+      <button class="header-action" onclick="openPhysicalModal()" title="Abrir cópia digital do cartão físico deixado na caixa de correio">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="8" y1="13" x2="16" y2="13"></line>
+          <line x1="8" y1="17" x2="13" y2="17"></line>
+        </svg>
+        <span>Ver Aviso Físico</span>
+      </button>
+    </header>
+
+    <!-- TELA 1: ACESSO RÁPIDO PÓS-ESCANEAMENTO (Sem CAPTCHA / Sem digitar 13 dígitos) -->
+    <section id="screen-1" class="screen active">
+      <div id="scan-simulator" class="scan-box">
+        <span class="badge badge-info" style="margin: 0 auto 8px;">Ponte Físico para Digital</span>
+        <h2 style="color: #FFFFFF; margin-bottom: 4px;">Escaneie o Aviso de Tentativa</h2>
+        <p style="color: #CBD5E1; font-size: 0.84rem;">
+          Sem CAPTCHA e sem digitar 13 caracteres. Aponte para o QR Code deixado na caixa de correio.
+        </p>
+        <div class="scan-frame" aria-hidden="true">
+          <div class="scan-line"></div>
+          <svg width="86" height="86" viewBox="0 0 100 100" fill="none">
+            <rect x="6" y="6" width="28" height="28" stroke="#FFFFFF" stroke-width="6"/>
+            <rect x="14" y="14" width="12" height="12" fill="#FFD400"/>
+            <rect x="66" y="6" width="28" height="28" stroke="#FFFFFF" stroke-width="6"/>
+            <rect x="74" y="14" width="12" height="12" fill="#FFD400"/>
+            <rect x="6" y="66" width="28" height="28" stroke="#FFFFFF" stroke-width="6"/>
+            <rect x="14" y="74" width="12" height="12" fill="#FFD400"/>
+            <rect x="44" y="44" width="14" height="14" fill="#FFFFFF"/>
+            <rect x="66" y="66" width="12" height="12" fill="#FFFFFF"/>
+            <rect x="82" y="82" width="12" height="12" fill="#FFD400"/>
+            <rect x="44" y="74" width="12" height="20" fill="#FFFFFF"/>
+          </svg>
+        </div>
+        <button class="btn btn-yellow" onclick="simulateScan()">
+          Simular leitura do QR Code do aviso
+        </button>
+      </div>
+
+      <!-- Atalho direto na Tela 1 para visualizar o cartão em papel -->
+      <button id="preview-card-s1" class="btn btn-secondary" style="min-height: 44px; font-size: 0.88rem;" onclick="openPhysicalModal()">
+        Visualizar cartão do Aviso Físico em papel
+      </button>
+
+      <div id="package-found" class="card package-summary" style="display: none;">
+        <span class="badge badge-warning">1ª tentativa não atendida</span>
+        <h1>Fone Bluetooth — Pedido #4092</h1>
+        <div class="code-pill">BR 849 201 394 BR</div>
+        <p>
+          <strong>Destinatário:</strong> Lucas Mendes<br />
+          Identificamos seu aviso automaticamente. Veja o que aconteceu e escolha como prefere receber.
+        </p>
+        <button class="btn btn-primary" onclick="goTo('screen-2')">
+          Ver detalhes e resolver entrega
+        </button>
+      </div>
+    </section>
+
+    <!-- TELA 2: RASTREAMENTO HUMANIZADO -->
+    <section id="screen-2" class="screen">
+      <div class="nav-bar" style="padding: 0;">
+        <button class="btn-back" onclick="goTo('screen-1')">&#8592; Voltar</button>
+        <span class="step-indicator">Status da entrega</span>
+      </div>
+
+      <div>
+        <h1>Fone Bluetooth — Pedido #4092</h1>
+        <p style="font-size: 0.82rem; margin-top: 2px;">Código: BR 849 201 394 BR</p>
+      </div>
+
+      <!-- Bloco dinâmico de status -->
+      <div id="status-banner" class="alert-box">
+        <span id="status-badge" class="badge badge-warning">Ação recomendada</span>
+        <strong id="status-headline" style="color: var(--warning-text); font-size: 0.98rem;">
+          O carteiro esteve aqui hoje às 11h20, mas ninguém pôde atender.
+        </strong>
+        <p id="status-subtext" style="color: #78350F; font-size: 0.88rem;">
+          Próxima tentativa automática: <strong>amanhã, entre 13h e 17h</strong>.
+        </p>
+        <div id="attempts-indicator" class="attempts-dots">
+          <span>Tentativas:</span>
+          <span class="dot filled"></span>
+          <span class="dot"></span>
+          <span class="dot"></span>
+          <span>1 de 3</span>
+        </div>
+
+        <!-- MELHORIA V2: Atalho contextual visível direto no card de status -->
+        <button type="button" class="btn-notice-inline" onclick="openPhysicalModal()">
+          <span class="btn-notice-inline-left">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="8" y1="13" x2="16" y2="13"></line>
+              <line x1="8" y1="17" x2="13" y2="17"></line>
+            </svg>
+            <span>Ver Aviso Físico deixado na caixa de correio</span>
+          </span>
+          <span aria-hidden="true">&#8250;</span>
+        </button>
+      </div>
+
+      <!-- Box de PIN (só aparece se autorizou terceiro) -->
+      <div id="active-pin-card" class="pin-display" style="display: none;">
+        <div style="font-size: 0.8rem; color: #E2E8F0;">Código de entrega para <strong id="pin-person-name"></strong></div>
+        <div class="pin-code" id="pin-value">4829</div>
+        <div style="font-size: 0.78rem; color: #CBD5E1; margin-bottom: 10px;">
+          A pessoa autorizada deve informar este PIN ao carteiro no momento da entrega.
+        </div>
+        <button class="btn btn-yellow" style="min-height: 40px; font-size: 0.86rem;" onclick="copyPin()">
+          Copiar / Enviar PIN no WhatsApp
+        </button>
+      </div>
+
+      <!-- Ação principal -->
+      <button id="main-action-btn" class="btn btn-primary" onclick="goTo('screen-3')">
+        Não estarei em casa / Alterar entrega
+      </button>
+
+      <button id="go-pass-btn" class="btn btn-secondary" style="display: none;" onclick="goTo('screen-4')">
+        Abrir Passe de Retirada na Agência
+      </button>
+
+      <!-- Linha do tempo sem siglas logísticas (CTE/CDD traduzidos) -->
+      <div class="card">
+        <h2>Trajeto da encomenda</h2>
+        <div class="timeline">
+          <div class="tl-item done">
+            <div class="tl-marker-col">
+              <div class="tl-dot"></div>
+              <div class="tl-line"></div>
+            </div>
+            <div>
+              <div class="tl-title">Pedido enviado pela loja</div>
+              <div class="tl-meta">21/11 às 16h10 • Postado em São Paulo</div>
+            </div>
+          </div>
+
+          <div class="tl-item done">
+            <div class="tl-marker-col">
+              <div class="tl-dot"></div>
+              <div class="tl-line"></div>
+            </div>
+            <div>
+              <div class="tl-title">Chegou à unidade do seu bairro</div>
+              <div class="tl-meta">Hoje às 07h45 • Pronto para rota de entrega</div>
+            </div>
+          </div>
+
+          <div class="tl-item current" id="tl-current-step">
+            <div class="tl-marker-col">
+              <div class="tl-dot"></div>
+              <div class="tl-line"></div>
+            </div>
+            <div>
+              <div class="tl-title" id="tl-current-title">1ª tentativa de entrega — sem resposta</div>
+              <div class="tl-meta" id="tl-current-meta">Hoje às 11h20 • Aviso deixado na caixa de correio</div>
+              <button type="button" class="inline-link-chip" onclick="openPhysicalModal()">
+                Abrir cópia do Aviso Físico &#8599;
+              </button>
+            </div>
+          </div>
+
+          <div class="tl-item">
+            <div class="tl-marker-col">
+              <div class="tl-dot"></div>
+              <div class="tl-line"></div>
+            </div>
+            <div>
+              <div class="tl-title" id="tl-next-title">Entrega concluída</div>
+              <div class="tl-meta" id="tl-next-meta">Aguardando próxima tentativa ou retirada</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TELA 3: CENTRAL DE DECISÃO ("RESOLVER ENTREGA") -->
+    <section id="screen-3" class="screen">
+      <div class="nav-bar" style="padding: 0;">
+        <button class="btn-back" onclick="goTo('screen-2')">&#8592; Voltar</button>
+        <span class="step-indicator">Escolher solução</span>
+      </div>
+
+      <div>
+        <h1>Como você prefere receber?</h1>
+        <p>Escolha a opção mais prática para evitar uma nova viagem perdida do carteiro.</p>
+      </div>
+
+      <!-- Opção 1: Reagendar -->
+      <div class="choice-card selected" id="opt-reschedule" onclick="selectChoice('reschedule')">
+        <div class="choice-header">
+          <div class="choice-icon">&#128197;</div>
+          <div>
+            <h2>Reagendar dia e período</h2>
+            <p style="font-size: 0.84rem;">Escolha quando terá alguém em casa para receber.</p>
+          </div>
+        </div>
+        <div class="choice-body" onclick="event.stopPropagation()">
+          <label style="font-size: 0.82rem; font-weight: 700;">1. Escolha o dia:</label>
+          <div class="pill-group">
+            <button type="button" class="pill-btn active" data-day="Amanhã (25/11)" onclick="pickOption(this, 'day')">Amanhã (25/11)</button>
+            <button type="button" class="pill-btn" data-day="Quinta (26/11)" onclick="pickOption(this, 'day')">Quinta (26/11)</button>
+          </div>
+
+          <label style="font-size: 0.82rem; font-weight: 700;">2. Escolha a janela de horário:</label>
+          <div class="pill-group">
+            <button type="button" class="pill-btn" data-period="Manhã (09h às 12h)" onclick="pickOption(this, 'period')">Manhã (09h–12h)</button>
+            <button type="button" class="pill-btn active" data-period="Tarde (13h às 17h)" onclick="pickOption(this, 'period')">Tarde (13h–17h)</button>
+          </div>
+
+          <button class="btn btn-primary" onclick="confirmReschedule()">Confirmar novo horário</button>
+        </div>
+      </div>
+
+      <!-- Opção 2: Autorizar terceiro / vizinho -->
+      <div class="choice-card" id="opt-neighbor" onclick="selectChoice('neighbor')">
+        <div class="choice-header">
+          <div class="choice-icon">&#129309;</div>
+          <div>
+            <h2>Autorizar vizinho ou portaria</h2>
+            <p style="font-size: 0.84rem;">Gera um PIN de segurança para outra pessoa receber por você.</p>
+          </div>
+        </div>
+        <div class="choice-body" onclick="event.stopPropagation()">
+          <label for="neighbor-input" style="font-size: 0.82rem; font-weight: 700;">
+            Nome da pessoa ou local (ex.: Dona Maria — Casa 12):
+          </label>
+          <input id="neighbor-input" class="input-field" type="text" placeholder="Ex.: Portaria ou Dona Maria (Casa 12)" />
+          <div id="neighbor-error" class="error-msg">Digite o nome da pessoa ou portaria autorizada.</div>
+          <button class="btn btn-primary" onclick="confirmNeighbor()">Gerar PIN de autorização</button>
+        </div>
+      </div>
+
+      <!-- Opção 3: Retirar na agência -->
+      <div class="choice-card" id="opt-pickup" onclick="selectChoice('pickup')">
+        <div class="choice-header">
+          <div class="choice-icon">&#127970;</div>
+          <div>
+            <h2>Prefiro retirar na agência</h2>
+            <p style="font-size: 0.84rem;">Deixe o pacote na Agência Central (800m) e gere o Passe de Retirada.</p>
+          </div>
+        </div>
+        <div class="choice-body" onclick="event.stopPropagation()">
+          <p style="font-size: 0.84rem;">
+            O pacote ficará disponível na <strong>Agência Central</strong> a partir de amanhã às 09h, com atendimento rápido via QR Code.
+          </p>
+          <button class="btn btn-primary" onclick="confirmPickup()">Direcionar para a agência</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TELA 4: PASSE DE RETIRADA FÍSICA (Ponte Digital -> Agência) -->
+    <section id="screen-4" class="screen">
+      <div class="nav-bar" style="padding: 0;">
+        <button class="btn-back" onclick="goTo('screen-2')">&#8592; Voltar ao status</button>
+        <span class="step-indicator">Passe de Retirada</span>
+      </div>
+
+      <h1>Retirada na Agência Física</h1>
+
+      <div class="deadline-banner">
+        Prazo limite: retire até sexta-feira (restam 6 dias antes da devolução ao remetente).
+      </div>
+
+      <!-- Dados da Agência -->
+      <div class="card" style="display: flex; flex-direction: column; gap: 8px;">
+        <span class="badge badge-success">Aberta agora • Seg a Sex, 09h às 17h</span>
+        <h2>Agência Central — Correios</h2>
+        <p>Rua das Flores, 240 — Centro (a 800m do seu endereço)</p>
+        <button class="btn btn-secondary" style="min-height: 42px; font-size: 0.88rem;" onclick="showToast('Rota aberta no mapa: 800m (aprox. 10 min a pé)')">
+          Abrir rota no mapa
+        </button>
+      </div>
+
+      <!-- Checklist físico para evitar viagem perdida -->
+      <div class="card">
+        <h2>O que levar no dia</h2>
+        <label class="checklist-item">
+          <input type="checkbox" />
+          <span>Documento oficial com foto (RG ou CNH)</span>
+        </label>
+        <label class="checklist-item">
+          <input type="checkbox" />
+          <span>Este QR Code de atendimento no celular</span>
+        </label>
+      </div>
+
+      <!-- QR Code de Balcão -->
+      <div class="card qr-pass-card">
+        <h2>QR Code de Atendimento Rápido</h2>
+        <p style="font-size: 0.84rem;">Mostre ao atendente no balcão para retirar sem precisar ditar o código.</p>
+        <div class="qr-svg-wrap" id="counter-qr">
+          <svg width="148" height="148" viewBox="0 0 120 120" fill="none" aria-label="QR Code de retirada">
+            <rect width="120" height="120" fill="#FFFFFF"/>
+            <rect x="8" y="8" width="32" height="32" stroke="#000000" stroke-width="6"/>
+            <rect x="17" y="17" width="14" height="14" fill="#000000"/>
+            <rect x="80" y="8" width="32" height="32" stroke="#000000" stroke-width="6"/>
+            <rect x="89" y="17" width="14" height="14" fill="#000000"/>
+            <rect x="8" y="80" width="32" height="32" stroke="#000000" stroke-width="6"/>
+            <rect x="17" y="89" width="14" height="14" fill="#000000"/>
+            <rect x="48" y="12" width="10" height="10" fill="#000000"/>
+            <rect x="62" y="24" width="10" height="16" fill="#000000"/>
+            <rect x="12" y="50" width="18" height="10" fill="#000000"/>
+            <rect x="38" y="48" width="16" height="16" fill="#000000"/>
+            <rect x="62" y="50" width="12" height="12" fill="#000000"/>
+            <rect x="82" y="50" width="26" height="10" fill="#000000"/>
+            <rect x="50" y="72" width="14" height="14" fill="#000000"/>
+            <rect x="72" y="72" width="12" height="24" fill="#000000"/>
+            <rect x="92" y="70" width="16" height="14" fill="#000000"/>
+            <rect x="50" y="96" width="16" height="14" fill="#000000"/>
+            <rect x="92" y="94" width="18" height="16" fill="#000000"/>
+          </svg>
+        </div>
+        <div class="code-pill" style="margin: 0 auto;">BR 849 201 394 BR</div>
+      </div>
+    </section>
+
+    <!-- Rodapé de apoio para os testes de usabilidade -->
+    <footer class="proto-footer">
+      <span class="version-pill">Protótipo IHC • V2 (Melhorado)</span>
+      <button class="link-btn" onclick="resetPrototype()">Reiniciar simulação</button>
+    </footer>
+  </main>
+
+  <!-- Modal do Cartão Físico (para imprimir ou mostrar em outro celular durante o teste) -->
+  <div id="physical-modal" class="modal-overlay" onclick="closePhysicalModal()">
+    <div class="physical-card" onclick="event.stopPropagation()">
+      <div class="physical-card-top">
+        <div style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase;">Correios • Aviso de Tentativa de Entrega</div>
+        <h2 style="margin: 4px 0 0; font-size: 1.15rem;">Tentamos entregar sua encomenda hoje</h2>
+      </div>
+      <div class="physical-card-body">
+        <div style="display: flex; justify-content: space-between; font-size: 0.86rem;">
+          <span><strong>Horário:</strong> Hoje, 11h20</span>
+          <span><strong>Tentativa:</strong> 1ª de 3</span>
+        </div>
+
+        <div class="physical-qr-row">
+          <svg width="78" height="78" viewBox="0 0 100 100" fill="none" style="flex-shrink: 0;">
+            <rect width="100" height="100" fill="#FFFFFF"/>
+            <rect x="6" y="6" width="28" height="28" stroke="#000" stroke-width="6"/>
+            <rect x="14" y="14" width="12" height="12" fill="#000"/>
+            <rect x="66" y="6" width="28" height="28" stroke="#000" stroke-width="6"/>
+            <rect x="74" y="14" width="12" height="12" fill="#000"/>
+            <rect x="6" y="66" width="28" height="28" stroke="#000" stroke-width="6"/>
+            <rect x="14" y="74" width="12" height="12" fill="#000"/>
+            <rect x="44" y="42" width="14" height="14" fill="#000"/>
+            <rect x="66" y="66" width="14" height="14" fill="#000"/>
+            <rect x="44" y="72" width="12" height="20" fill="#000"/>
+            <rect x="84" y="84" width="10" height="10" fill="#000"/>
+          </svg>
+          <div>
+            <strong style="font-size: 0.9rem; color: var(--correios-blue-dark);">Aponte a câmera aqui</strong>
+            <p style="font-size: 0.8rem; margin-top: 3px;">
+              Reagende o horário, autorize um vizinho ou veja onde retirar — sem CAPTCHA.
+            </p>
+          </div>
+        </div>
+
+        <div style="font-size: 0.8rem; color: var(--text-muted);">
+          Código alternativo: <strong>BR 849 201 394 BR</strong>
+        </div>
+
+        <div class="no-print" style="display: flex; gap: 8px; margin-top: 4px;">
+          <button class="btn btn-primary" style="min-height: 42px; font-size: 0.85rem;" onclick="window.print()">Imprimir aviso</button>
+          <button class="btn btn-secondary" style="min-height: 42px; font-size: 0.85rem;" onclick="closePhysicalModal()">Fechar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const state = {
+      selectedDay: 'Amanhã (25/11)',
+      selectedPeriod: 'Tarde (13h às 17h)',
+      resolution: null, // 'rescheduled' | 'neighbor' | 'pickup'
+      neighborName: '',
+      pin: '4829'
+    };
+
+    function goTo(screenId) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(screenId).classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function simulateScan() {
+      const scanBox = document.getElementById('scan-simulator');
+      const previewBtn = document.getElementById('preview-card-s1');
+      const pkgFound = document.getElementById('package-found');
+      scanBox.style.display = 'none';
+      if (previewBtn) previewBtn.style.display = 'none';
+      pkgFound.style.display = 'flex';
+      showToast('QR Code lido com sucesso — pacote localizado!');
+    }
+
+    function selectChoice(type) {
+      document.querySelectorAll('.choice-card').forEach(c => c.classList.remove('selected'));
+      document.getElementById('opt-' + type).classList.add('selected');
+    }
+
+    function pickOption(btn, group) {
+      const parent = btn.parentElement;
+      parent.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      if (group === 'day') state.selectedDay = btn.dataset.day;
+      if (group === 'period') state.selectedPeriod = btn.dataset.period;
+    }
+
+    function confirmReschedule() {
+      state.resolution = 'rescheduled';
+      updateStatusScreen();
+      goTo('screen-2');
+      showToast('Entrega reagendada para ' + state.selectedDay + ', ' + state.selectedPeriod + '.');
+    }
+
+    function confirmNeighbor() {
+      const input = document.getElementById('neighbor-input');
+      const err = document.getElementById('neighbor-error');
+      const name = input.value.trim();
+
+      if (!name) {
+        err.style.display = 'block';
+        input.focus();
+        return;
+      }
+
+      err.style.display = 'none';
+      state.resolution = 'neighbor';
+      state.neighborName = name;
+      state.pin = String(Math.floor(1000 + Math.random() * 9000));
+      updateStatusScreen();
+      goTo('screen-2');
+      showToast('Autorização criada! Compartilhe o PIN ' + state.pin + ' com ' + name + '.');
+    }
+
+    function confirmPickup() {
+      state.resolution = 'pickup';
+      updateStatusScreen();
+      goTo('screen-4');
+      showToast('Pacote direcionado para a Agência Central!');
+    }
+
+    function updateStatusScreen() {
+      const banner = document.getElementById('status-banner');
+      const badge = document.getElementById('status-badge');
+      const headline = document.getElementById('status-headline');
+      const subtext = document.getElementById('status-subtext');
+      const attempts = document.getElementById('attempts-indicator');
+      const pinCard = document.getElementById('active-pin-card');
+      const goPassBtn = document.getElementById('go-pass-btn');
+      const mainActionBtn = document.getElementById('main-action-btn');
+      const tlNextTitle = document.getElementById('tl-next-title');
+      const tlNextMeta = document.getElementById('tl-next-meta');
+
+      pinCard.style.display = 'none';
+      goPassBtn.style.display = 'none';
+
+      if (state.resolution === 'rescheduled') {
+        banner.className = 'alert-box confirmed';
+        badge.className = 'badge badge-success';
+        badge.textContent = 'Reagendamento confirmado';
+        headline.style.color = 'var(--success-text)';
+        headline.textContent = 'Nova tentativa agendada para ' + state.selectedDay;
+        subtext.style.color = '#065F46';
+        subtext.innerHTML = 'Janela reservada: <strong>' + state.selectedPeriod + '</strong>. Você receberá aviso quando o carteiro sair.';
+        attempts.style.display = 'none';
+        mainActionBtn.textContent = 'Alterar minha escolha';
+        tlNextTitle.textContent = '2ª tentativa agendada';
+        tlNextMeta.textContent = state.selectedDay + ' • ' + state.selectedPeriod;
+      } else if (state.resolution === 'neighbor') {
+        banner.className = 'alert-box confirmed';
+        badge.className = 'badge badge-success';
+        badge.textContent = 'Terceiro autorizado';
+        headline.style.color = 'var(--success-text)';
+        headline.textContent = 'Entrega liberada para ' + state.neighborName;
+        subtext.style.color = '#065F46';
+        subtext.innerHTML = 'Próxima tentativa: <strong>amanhã, entre 13h e 17h</strong>, mediante confirmação do PIN abaixo.';
+        attempts.style.display = 'none';
+        pinCard.style.display = 'block';
+        document.getElementById('pin-person-name').textContent = state.neighborName;
+        document.getElementById('pin-value').textContent = state.pin;
+        mainActionBtn.textContent = 'Alterar minha escolha';
+        tlNextTitle.textContent = 'Entrega autorizada para ' + state.neighborName;
+        tlNextMeta.textContent = 'Validação física com PIN ' + state.pin;
+      } else if (state.resolution === 'pickup') {
+        banner.className = 'alert-box confirmed';
+        badge.className = 'badge badge-success';
+        badge.textContent = 'Direcionado para agência';
+        headline.style.color = 'var(--success-text)';
+        headline.textContent = 'Aguardando retirada na Agência Central';
+        subtext.style.color = '#065F46';
+        subtext.innerHTML = 'Rua das Flores, 240 • Disponível até <strong>sexta-feira</strong> (Seg a Sex, 09h às 17h).';
+        attempts.style.display = 'none';
+        goPassBtn.style.display = 'inline-flex';
+        mainActionBtn.textContent = 'Alterar minha escolha';
+        tlNextTitle.textContent = 'Retirada presencial na Agência Central';
+        tlNextMeta.textContent = 'Use o Passe de Retirada com QR Code e RG';
+      }
+    }
+
+    function copyPin() {
+      const msg = 'Oi ' + state.neighborName + '! Autorizei você a receber minha encomenda dos Correios (Pedido #4092). O PIN para informar ao carteiro é: ' + state.pin;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(msg).catch(() => {});
+      }
+      showToast('Mensagem com PIN ' + state.pin + ' copiada para enviar no WhatsApp!');
+    }
+
+    function resetPrototype() {
+      state.resolution = null;
+      state.neighborName = '';
+      document.getElementById('neighbor-input').value = '';
+      document.getElementById('neighbor-error').style.display = 'none';
+      document.getElementById('scan-simulator').style.display = 'block';
+      const previewBtn = document.getElementById('preview-card-s1');
+      if (previewBtn) previewBtn.style.display = 'inline-flex';
+      document.getElementById('package-found').style.display = 'none';
+
+      const banner = document.getElementById('status-banner');
+      banner.className = 'alert-box';
+      const badge = document.getElementById('status-badge');
+      badge.className = 'badge badge-warning';
+      badge.textContent = 'Ação recomendada';
+      const headline = document.getElementById('status-headline');
+      headline.style.color = 'var(--warning-text)';
+      headline.textContent = 'O carteiro esteve aqui hoje às 11h20, mas ninguém pôde atender.';
+      const subtext = document.getElementById('status-subtext');
+      subtext.style.color = '#78350F';
+      subtext.innerHTML = 'Próxima tentativa automática: <strong>amanhã, entre 13h e 17h</strong>.';
+      document.getElementById('attempts-indicator').style.display = 'flex';
+      document.getElementById('active-pin-card').style.display = 'none';
+      document.getElementById('go-pass-btn').style.display = 'none';
+      document.getElementById('main-action-btn').textContent = 'Não estarei em casa / Alterar entrega';
+      document.getElementById('tl-next-title').textContent = 'Entrega concluída';
+      document.getElementById('tl-next-meta').textContent = 'Aguardando próxima tentativa ou retirada';
+
+      selectChoice('reschedule');
+      goTo('screen-1');
+      showToast('Simulação reiniciada para o próximo teste.');
+    }
+
+    function openPhysicalModal() {
+      document.getElementById('physical-modal').classList.add('open');
+    }
+
+    function closePhysicalModal() {
+      document.getElementById('physical-modal').classList.remove('open');
+    }
+
+    let toastTimer;
+    function showToast(text) {
+      const toast = document.getElementById('toast');
+      toast.textContent = text;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 3200);
+    }
+  </script>
+</body>
+</html>
